@@ -8,7 +8,7 @@
  {
  Print "<tr>";
  Print "<th>Product Name:</th> <td>".$info['name'] . "</td> ";
-Print "<th>Manufacturur:</th> <td>".$info['manufacturer'] . " </td>";
+Print "<th>Manufacturer:</th> <td>".$info['manufacturer'] . " </td>";
  Print "<th>Quantity in Stock:</th> <td>".$info['quantity_in_house'] . " </td></tr>";
  }
  Print "</table>";
