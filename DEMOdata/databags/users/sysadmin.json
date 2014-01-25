@@ -1,0 +1,10 @@
+{
+  "groups": [
+    "sysadmin", "sudo"
+  ],
+  "comment": "System Administrator",
+  "password": "xxxx$hhTwHNMNUpY2GJcjxxxx",
+  "id": "sysadmin",
+  "shell": "/bin/bash",
+  "email": "tdj82@drexel.edu"
+}

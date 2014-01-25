@@ -1,0 +1,123 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant::Config.run do |config|
+
+  config.vm.box = "precise64"
+  config.vm.box_url = "http://files.vagrantup.com/precise64.box"
+
+
+  config.vm.define "sql1" do |sql1|
+	sql1.vm.network :hostonly, "192.168.33.13"
+  #      sql1.vm.forward_port 3306, 33061
+        sql1.vm.provision :chef_solo do |chef3|
+          chef3.data_bags_path = "../DEMOdata/databags"
+          chef3.cookbooks_path = "../DEMOdata/cookbooks"
+          chef3.add_recipe "chef-solo-search"
+          chef3.add_recipe "apt"
+          chef3.add_recipe "users::sysadmins"
+          chef3.add_recipe "sudo"
+          chef3.add_recipe "openssl"
+          chef3.add_recipe "mysql"
+	  chef3.add_recipe "mysql::server"
+          chef3.add_recipe "demoload"
+          chef3.add_recipe "openssh"
+          chef3.json = { 
+                      :apache=> { :default_site_enabled => true },
+                      :authorization=> {
+                                   :sudo=> {
+                                   :passwordless=> true,
+	                           :users=> ["sysadmin"],
+                                   :groups=> ["admin", "sudo"]
+                                      }
+                      },
+                       :openssh=> {
+                                :permit_root_login=> "no",
+                                :password_authentication=> "yes"
+                                },
+
+                       :mysql=> {
+		                :server_root_password=> "xxxxx",
+	                        :server_repl_password=> "xxxxx",
+				:server_debian_password=> "xxxxx",
+	                        :bind_address=>"192.168.33.13"
+                        }
+         
+             }
+
+     end
+  end
+
+
+ 
+  config.vm.define "www1" do |www1|
+	www1.vm.network :hostonly, "192.168.33.11"
+    #    www1.vm.forward_port 80, 8080
+        www1.vm.provision :chef_solo do |chef1|
+          chef1.data_bags_path = "../DEMOdata/databags"
+          chef1.cookbooks_path = "../DEMOdata/cookbooks"
+          chef1.add_recipe "chef-solo-search"
+          chef1.add_recipe "apt"
+          chef1.add_recipe "users::sysadmins"
+          chef1.add_recipe "sudo"
+          chef1.add_recipe "apache2"
+          chef1.add_recipe "apache2::mod_php5"
+          chef1.add_recipe "php::module_mysql"
+          chef1.add_recipe "openssh"
+          chef1.json = { 
+                      :apache=> { :default_site_enabled => true },
+                      :authorization=> {
+                                   :sudo=> {
+                                   :passwordless=> true,
+	                           :users=> ["sysadmin"],
+                                   :groups=> ["admin", "sudo"]
+                                      }
+                      },
+                       :openssh=> {
+                                :permit_root_login=> "no",
+                                :password_authentication=> "yes"
+                                },
+
+                        }
+         
+         
+
+     end
+  end
+
+  config.vm.define "www2" do |www2|
+        www2.vm.network :hostonly, "192.168.33.12"
+     #   www2.vm.forward_port 80, 8090
+        www2.vm.provision :chef_solo do |chef2|
+           chef2.data_bags_path = "../DEMOdata/databags"
+           chef2.cookbooks_path = "../DEMOdata/cookbooks"
+           chef2.add_recipe "chef-solo-search"
+           chef2.add_recipe "apt"
+	   chef2.add_recipe "users::sysadmins"
+           chef2.add_recipe "sudo"
+           chef2.add_recipe "apache2"
+           chef2.add_recipe "apache2::mod_php5"
+           chef2.add_recipe "php::module_mysql"
+           chef2.add_recipe "openssh"
+           chef2.json = { 
+                      :apache=> { :default_site_enabled => true },
+                      :authorization=> {
+                                   :sudo=> {
+                                   :passwordless=> true,
+	                           :users=> ["sysadmin"],
+                                   :groups=> ["admin", "sudo"]
+                                      }
+                      },
+                       :openssh=> {
+                                :permit_root_login=> "no",
+                                :password_authentication=> "yes"
+                                },
+
+                        }
+
+     end
+  end    
+
+
+
+end
