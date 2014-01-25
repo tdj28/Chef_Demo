@@ -1,0 +1,21 @@
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+auto eth0
+iface eth0 inet static
+  pre-up iptables-restore < /etc/rc.firewall
+  address 129.25.7.112
+  netmask 255.255.128.0
+  network 129.25.1.0
+  broadcast 129.25.1.255
+  gateway 129.25.1.253
+  dns-nameservers 144.118.24.20 144.118.24.10
+
+auto eth1
+# The backyard
+iface eth1 inet static
+        address 192.168.2.100
+        netmask 255.255.255.0
+        broadcast 192.168.2.255
+

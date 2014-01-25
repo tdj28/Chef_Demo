@@ -1,0 +1,54 @@
+#!/bin/sh
+
+ext=eth0
+int=eth1
+
+extip="129.25.7.112"
+
+# Enable IP forwarding.
+echo "1" > /proc/sys/net/ipv4/ip_forward
+
+# Flush all rules.
+/sbin/iptables -P INPUT ACCEPT
+/sbin/iptables -F INPUT
+/sbin/iptables -P OUTPUT ACCEPT
+/sbin/iptables -F OUTPUT
+/sbin/iptables -P FORWARD DROP
+/sbin/iptables -F FORWARD
+/sbin/iptables -t nat -F
+
+#####
+# Masquerade for internal network at int via ext.
+
+/sbin/iptables -A INPUT -i $ext -m state --state ESTABLISHED,RELATED -j ACCEPT
+/sbin/iptables -A FORWARD -i $ext -o $int -m state --state ESTABLISHED,RELATED -j ACCEPT
+/sbin/iptables -A FORWARD -i $int -o $ext -j ACCEPT
+
+# Use SNAT for static ext interface, MASQUERADE for DHCP ext interface.
+if [ -n "$extip" ]; then
+        /sbin/iptables -t nat -A POSTROUTING -o $ext -j SNAT --to-source $extip
+else
+        /sbin/iptables -t nat -A POSTROUTING -o $ext -j MASQUERADE
+fi
+
+# Let anything in through int, i.e. trust the deployed network
+/sbin/iptables -A INPUT -i $int -j ACCEPT
+
+# Permit ssh and http traffic
+/sbin/iptables -A INPUT -i $ext --protocol tcp --dport ssh    -j ACCEPT
+/sbin/iptables -A INPUT -i $ext --protocol tcp --dport http   -j ACCEPT
+/sbin/iptables -A INPUT -i $ext --protocol tcp --dport https   -j ACCEPT
+
+# Ping requests help determine whether or not the server is connected to network
+/sbin/iptables -A INPUT --protocol icmp --icmp-type echo-request -j ACCEPT
+
+# Unlimited access to the loopback interface
+/sbin/iptables -A INPUT -i lo -j ACCEPT
+/sbin/iptables -A OUTPUT -o lo -j ACCEPT
+
+/sbin/iptables -A INPUT -p all -s localhost  -i eth0 -j DROP           
+# - Deny outside packets from internet whichclaim to be from your loopback interface
+
+# REJECT (rather than DROP) any INPUTs that do not match one of the above rules
+/sbin/iptables -A INPUT -i $ext -p tcp -j REJECT
+/sbin/iptables -A INPUT -i $ext -p udp -j REJECT

@@ -1,0 +1,18 @@
+defaults
+    log     global
+    mode    http
+    option  httplog
+    option  dontlognull
+    retries 3
+    option redispatch
+    timeout connect  5000
+    timeout client  10000
+    timeout server  10000
+
+listen borg0.physics.drexel.edu 0.0.0.0:80
+    mode http
+    balance roundrobin
+    option httpclose
+    option forwardfor
+    server lamp1 192.168.33.11:80 check
+    server lamp2 192.168.33.12:80 check
